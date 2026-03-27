@@ -1,27 +1,17 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  output   = "../app/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-}
-
-model User {
-  id            String        @id @default(cuid())
-  name          String?
-  email         String        @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  job           Job[]         @relation("PostedJobs")
-  application   Application[]
+  url      = env("DATABASE_URL")
 }
 
 model Account {
@@ -48,7 +38,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -59,31 +49,45 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model Job {
-  id          String  @id @default(cuid())
-  title       String
-  company     String
-  location    String
-  type        String
-  description String  @db.Text
-  salary      String?
+model User {
+  id String @id @default(cuid())
+  name String?
+  email String? @unique
+  emailVerified DateTime?
+  image String?
+  accounts Account[]
+  sessions Session[]
+  jobs Job[] @relation("PostedJobs")
+  applications Application[]
+}
 
-  postedAt   DateTime @default(now())
-  postedBy   User     @relation("PostedJobs", fields: [postedById], references: [id])
+model Job {
+  id String @id @default(cuid())
+  title String
+  company String
+  location String
+  type String
+  description String @db.Text
+  salary String?
+
+  postedAt DateTime @default(now())
+  postedBy User @relation("PostedJobs", fields: [postedById], references: [id])
   postedById String
 
   applications Application[]
 }
 
 model Application {
-  id        String   @id @default(uuid())
-  jobId     String
-  userId    String
-  status    String   @default("PENDING")
+  id String @id @default(cuid())
+  jobId String
+  userId String
+  status String @default("PENDING") // REVIEWING, ACCEPTED, REJECTED
   appliedAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
-  job  Job  @relation(fields: [jobId], references: [id])
+  job Job @relation(fields: [jobId], references: [id])
 
   @@unique([jobId, userId])
 }
+
+
