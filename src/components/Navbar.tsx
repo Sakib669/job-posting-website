@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-// import { logout } from "@/lib/auth";
+import { logout } from "@/lib/auth";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -48,7 +48,7 @@ export default function Navbar() {
                   Dashboard
                 </Link>
                 <button
-                  // onClick={logout}
+                  onClick={logout}
                   className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Sign Out
